@@ -1,11 +1,11 @@
 package main
 
 import (
+	"log"
 	"github.com/urfave/cli/v2"
-	log "github.com/sirupsen/logrus"
 	"os"
 )
-
+// cd go-docker
 // $GOROOT/bin/go build .
 // ./go-docker run -it /bin/sh
 // ./go-docker run -it /bin/ls

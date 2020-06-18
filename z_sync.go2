@@ -1,0 +1,146 @@
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"fmt"
+	"io"
+	"net"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
+)
+
+const (
+	SERVER_NETWORK = "tcp"
+	SERVER_ADDRESS = "localhost:8085"
+	DELIMITER = '\t'
+)
+
+func sync_test() {
+
+	sigRecv1 := make(chan os.Signal, 1)
+	sigs1 := []os.Signal{syscall.SIGINT, syscall.SIGQUIT}
+
+	fmt.Printf("sss %s\n", sigs1)
+	signal.Notify(sigRecv1, sigs1...)
+
+	sigRecv2 := make(chan os.Signal, 1)
+	sigs2 := []os.Signal{syscall.SIGQUIT}
+
+	signal.Notify(sigRecv2, sigs2...)
+
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		
+
+		fmt.Printf("Received a signal %s", "aaaa")
+		wg.Done()
+	}()
+
+	go func() {
+		fmt.Println("aaaa")
+		wg.Done()
+	}()
+
+	wg.Wait()
+	fmt.Println("Main end!!!!")
+}
+
+func net_test() {
+	// server
+	listener, err := net.Listen("tcp", "127.0.0.1:8085")
+	conn, err := listener.Accept()
+
+
+	// client
+	// Dial
+	conn, err = net.Dial("tcp", "127.0.0.1:8085")
+
+	var dataBuffer bytes.Buffer
+
+	b := make([]byte, 10)
+	for {
+		n, err := conn.Read(b)
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println("The connection is closed.")
+				conn.Close()
+			} else {
+
+			}
+			break
+		}
+		dataBuffer.Write(b[:n])
+	}
+	// n, err := conn.Read(b)
+	// content := string(b[:n])
+	// buffer reader
+	reader := bufio.NewReader(conn)
+
+	conn.LocalAddr().Network()
+	conn.SetDeadline(time.Now().Add(2 * time.Second))
+
+	// var listener net.Listener
+	listener, err = net.Listen(SERVER_NETWORK, SERVER_ADDRESS)
+
+	defer listener.Close()
+	listener.Addr()
+
+
+
+
+}
+
+func handleConn(conn net.Conn) {
+	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+	
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		wg.Done()
+	}()
+	go func() {
+		wg.Done()
+	}()
+	wg.Wait()
+
+	names := []string{}
+
+	var aa chan<- int
+	var bb <-chan int
+
+	intChan := make(chan int, 1)
+	ticker := time.NewTicker(time.Second)
+
+	go func() {
+		for _ = range ticker.C {
+			select {
+			case intChan <- 1:
+			case intChan <- 2:
+			case intChan <- 3:
+			}
+		}
+		fmt.Println("End.[Sender]")
+	}()
+	var sum int
+	for e := range intChan {
+		fmt.Printf("Receive: %v\n", e)
+		sum += e
+		if sum > 10 {
+			fmt.Printf("Got: %v\n", sum)
+			break
+		}
+	}
+	fmt.Println("End. [receiver]")
+
+	
+
+
+}
+

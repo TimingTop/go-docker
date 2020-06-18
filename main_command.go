@@ -14,32 +14,43 @@ var runCommand = cli.Command {
 			Name: "it",
 			Usage: "enable tty",
 		},
-		&cli.BoolFlag {
+		&cli.StringFlag {
 			Name: "m",
 			Usage: "memory limit",
 		},
-		&cli.BoolFlag {
+		&cli.StringFlag {
 			Name: "cpushare",
 			Usage: "cpushare limit",
 		},
-		&cli.BoolFlag {
+		&cli.StringFlag {
 			Name: "cpuset",
 			Usage: "cpuset limit",
+		},
+		&cli.StringFlag {
+			Name: "v",
+			Usage: "volume",
 		},
 	},
 	Action: func(c *cli.Context) error {
 
 		fmt.Println("run command.....")
-		if len(c.Args().Slice()) < 1 {
+
+		
+		// if len(c.Args().Slice()) < 1 {
+		// 	return fmt.Errorf("Missing command")
+		// }
+		if c.Args().Len() < 1 {
 			return fmt.Errorf("Missing command")
 		}
+
+		
 		// 把 标签以外的所有参数读出来，第一个参数
 		// 是 image 的名字
-		// var cmdArray []string
-		// for _, arg := range c.Args().Slice() {
-		// 	fmt.Println(arg)
-		// 	cmdArray = append(cmdArray, arg)
-		// }
+		var cmdArray []string
+		for _, arg := range c.Args().Slice() {
+			fmt.Println(arg)
+			cmdArray = append(cmdArray, arg)
+		}
 
 		// 获取镜像名字
 		// imageName := cmdArray[0]
@@ -47,12 +58,10 @@ var runCommand = cli.Command {
 		
 		createTty := c.Bool("it")
 		// detach := c.Bool("d")
-
-		cmd := c.Args().Get(0)
+		volume := c.String("v")
+		// cmd := c.Args().Get(0)
 			
-		
-		Run(createTty, cmd)
-		
+		Run(createTty, cmdArray, volume)
 		return nil
 	},
 
